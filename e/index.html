@@ -40,11 +40,6 @@
     text-align: center; font-weight: 700; text-decoration: none;
     color: var(--accent); border: 1.5px solid var(--accent);
   }
-  code {
-    display: block; margin-top: 10px; padding: 10px 12px; border-radius: 10px;
-    background: var(--bg); border: 1px solid var(--line); font-size: 12px;
-    word-break: break-all; color: var(--soft);
-  }
   .error { color: var(--accent); }
 </style>
 </head>
@@ -123,8 +118,8 @@
     }
 
     const steps = el('div', null, 'steps');
-    steps.innerHTML = '<b>Have Earie?</b> Copy the code, then in the app open ' +
-      '<b>Your Own → + → Import from code</b>.<br><br><b>No Earie yet?</b> Get it ' +
+    steps.innerHTML = '<b>Have Earie?</b> Copy this link, then in Earie tap ' +
+      '<b>+ → Add shared exercise</b>.<br><br><b>No Earie yet?</b> Get it ' +
       'free through TestFlight, then come back to this link.';
     card.append(steps);
 
@@ -132,13 +127,12 @@
     get.href = TESTFLIGHT_URL;
     card.append(get);
 
-    const btn = el('button', 'Copy code');
+    const btn = el('button', 'Copy link');
     btn.onclick = async () => {
-      try { await navigator.clipboard.writeText(code); btn.textContent = 'Copied!'; }
-      catch (_) { btn.textContent = 'Select the code below to copy it'; }
+      try { await navigator.clipboard.writeText(location.href); btn.textContent = 'Copied!'; }
+      catch (_) { btn.textContent = 'Copy the link from the address bar'; }
     };
     card.append(btn);
-    card.append(el('code', code));
   })();
 </script>
 </body>
