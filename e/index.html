@@ -35,6 +35,11 @@
     margin-top: 18px; width: 100%; padding: 14px; border: 0; border-radius: 12px;
     background: var(--accent); color: #fff; font: inherit; font-weight: 700; cursor: pointer;
   }
+  a.get {
+    display: block; margin-top: 18px; padding: 14px; border-radius: 12px;
+    text-align: center; font-weight: 700; text-decoration: none;
+    color: var(--accent); border: 1.5px solid var(--accent);
+  }
   code {
     display: block; margin-top: 10px; padding: 10px 12px; border-radius: 10px;
     background: var(--bg); border: 1px solid var(--line); font-size: 12px;
@@ -52,6 +57,9 @@
 </main>
 <script>
   // The exercise travels in the link after '#': base64url(zlib(json)).
+  // Public TestFlight invite for people who don't have Earie yet.
+  const TESTFLIGHT_URL = 'https://testflight.apple.com/join/w7bGDM7r';
+
   const TYPE_LABELS = {
     interval_guess: 'Interval Recognition', interval: 'Interval Degrees',
     triad: 'Chords: Triads', tetrad: 'Chords: Tetrads', scale: 'Scales',
@@ -116,9 +124,13 @@
 
     const steps = el('div', null, 'steps');
     steps.innerHTML = '<b>Have Earie?</b> Copy the code, then in the app open ' +
-      '<b>Your Own → Add from code</b>.<br><br><b>No Earie yet?</b> Ask whoever ' +
-      'sent this for an invite.';
+      '<b>Your Own → Add from code</b>.<br><br><b>No Earie yet?</b> Get it ' +
+      'free through TestFlight, then come back to this link.';
     card.append(steps);
+
+    const get = el('a', 'Get Earie on TestFlight', 'get');
+    get.href = TESTFLIGHT_URL;
+    card.append(get);
 
     const btn = el('button', 'Copy code');
     btn.onclick = async () => {
