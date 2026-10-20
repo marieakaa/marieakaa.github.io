@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Earie exercise</title>
+<meta name="description" content="An ear training exercise shared from Earie.">
+<style>
+  :root {
+    --bg: #faf6ef; --card: #ffffff; --ink: #3a2e2a; --soft: #7d6a62;
+    --accent: #e0506e; --line: #eadfd3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #201a17; --card: #2b2320; --ink: #f3e9e1; --soft: #b8a79d; --line: #3d332e; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex; justify-content: center;
+    padding: max(24px, env(safe-area-inset-top)) 16px 32px;
+  }
+  main { width: 100%; max-width: 440px; }
+  .brand { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--soft); }
+  .card {
+    margin-top: 12px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 20px; padding: 22px 20px;
+  }
+  h1 { margin: 4px 0 2px; font-size: 26px; line-height: 1.2; }
+  .meta { color: var(--soft); font-size: 14px; }
+  ul { margin: 14px 0 0; padding-left: 18px; color: var(--ink); font-size: 14px; }
+  .steps { margin-top: 18px; font-size: 14px; color: var(--soft); }
+  .steps b { color: var(--ink); }
+  button {
+    margin-top: 18px; width: 100%; padding: 14px; border: 0; border-radius: 12px;
+    background: var(--accent); color: #fff; font: inherit; font-weight: 700; cursor: pointer;
+  }
+  code {
+    display: block; margin-top: 10px; padding: 10px 12px; border-radius: 10px;
+    background: var(--bg); border: 1px solid var(--line); font-size: 12px;
+    word-break: break-all; color: var(--soft);
+  }
+  .error { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">Earie · shared exercise</div>
+  <div class="card" id="card">
+    <p class="meta">Loading…</p>
+  </div>
+</main>
+<script>
+  // The exercise travels in the link after '#': base64url(zlib(json)).
+  const TYPE_LABELS = {
+    interval_guess: 'Interval Recognition', interval: 'Interval Degrees',
+    triad: 'Chords: Triads', tetrad: 'Chords: Tetrads', scale: 'Scales',
+    chord_degree: 'Chord Degrees', chord_progression: 'Chord Progressions',
+    piano_chord: 'Piano Chords', note_unpack: 'Unpack the Notes',
+  };
+
+  function lengthPhrase(c) {
+    const q = c.questionCount, s = c.sessionSeconds || 0;
+    if (q !== -1 && q != null) return q === 1 ? '1 question' : q + ' questions';
+    if (s > 0) {
+      const m = Math.floor(s / 60), r = s % 60;
+      return m === 0 ? r + ' s' : (r === 0 ? m + ' min' : m + ' min ' + r + ' s');
+    }
+    return 'Unlimited';
+  }
+
+  async function decode(code) {
+    const b64 = code.replace(/-/g, '+').replace(/_/g, '/');
+    const bin = atob(b64 + '==='.slice((b64.length + 3) % 4));
+    const bytes = Uint8Array.from(bin, ch => ch.charCodeAt(0));
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));
+    return JSON.parse(await new Response(stream).text());
+  }
+
+  function el(tag, text, cls) {
+    const e = document.createElement(tag);
+    if (text != null) e.textContent = text;
+    if (cls) e.className = cls;
+    return e;
+  }
+
+  (async () => {
+    const card = document.getElementById('card');
+    const code = location.hash.slice(1);
+    card.textContent = '';
+    if (!code) {
+      card.append(el('p', 'This link has no exercise in it.', 'error'));
+      return;
+    }
+    let data;
+    try { data = await decode(code); } catch (_) {
+      card.append(el('p', 'This exercise link is incomplete. Ask your friend to send it again.', 'error'));
+      return;
+    }
+    const c = data.c || {};
+    card.append(el('div', TYPE_LABELS[data.t] || 'Exercise', 'meta'));
+    card.append(el('h1', c.name || 'Untitled exercise'));
+    card.append(el('div', lengthPhrase(c) + (c.timerSeconds > 0 ? ' · ' + c.timerSeconds + ' s timer' : ''), 'meta'));
+
+    // A few readable details, when the exercise has them.
+    const details = [];
+    if (c.noteCount) details.push(c.noteCount + ' notes played together');
+    if (c.qualities && c.qualities.length) details.push('Qualities: ' + c.qualities.join(', '));
+    if (c.scaleNames && c.scaleNames.length) details.push('Scales: ' + c.scaleNames.join(', '));
+    if (c.scaleName) details.push('Key: ' + c.scaleName);
+    if (details.length) {
+      const ul = el('ul');
+      details.forEach(d => ul.append(el('li', d)));
+      card.append(ul);
+    }
+
+    const steps = el('div', null, 'steps');
+    steps.innerHTML = '<b>Have Earie?</b> Copy the code, then in the app open ' +
+      '<b>Your Own → Add from code</b>.<br><br><b>No Earie yet?</b> Ask whoever ' +
+      'sent this for an invite.';
+    card.append(steps);
+
+    const btn = el('button', 'Copy code');
+    btn.onclick = async () => {
+      try { await navigator.clipboard.writeText(code); btn.textContent = 'Copied!'; }
+      catch (_) { btn.textContent = 'Select the code below to copy it'; }
+    };
+    card.append(btn);
+    card.append(el('code', code));
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["U6T5Q4PAFM.com.marie.earie"],
+        "appID": "U6T5Q4PAFM.com.marie.earie",
+        "components": [{ "/": "/e" }, { "/": "/e/*" }],
+        "paths": ["/e", "/e/*"]
+      }
+    ]
+  }
+}
